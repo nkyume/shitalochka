@@ -1,5 +1,53 @@
 import re
 
+class Pet:
+    def __init__(self, name, breed):
+        self.name = name
+        self.breed = breed
+
+        
+class Case:
+    def __init__(self, date, time, pet, payment_method, price,
+                 extra, total_income, groomer_name,
+                 groomer_percent, trans, cash):
+        
+        self.day, self.month, self.year = date
+        self.time = time
+        
+        self.pet = pet
+        
+        self.payment_method = payment_method
+        self.price = price
+        self.extra = extra 
+        self.total_income = total_income
+        self.transaction = trans
+        self.cash = cash
+        
+        self.groomer_name = groomer_name
+        self.groomer_percent = groomer_percent
+        self.groomer_income = self.calculate_groomer_income()
+               
+    def calculate_groomer_income(self):
+        return self.case_income * (self.groomer_percent * 0.01)
+
+                
+class DailyReport:
+    def __init__(self, date, admin):
+        self.day, self.month, self.year = date
+        self.cases = []
+        
+        self.admin = admin
+        
+    def add_case(self, case):
+        self.cases.append[case]
+        
+        
+
+class WeeklyReport:
+    def __init__(self):
+        pass
+        
+
 
 def main():
     with open('input.txt', encoding='utf8') as raw_input:
@@ -9,14 +57,12 @@ def main():
         cash = 0
         transaction = 0
 
-        groomers = []
-        groomer = None
+        groomers = {}
         
         date_current = None
         for line in text:
             line = line.strip()
             line = line.split(':')
-            
             
             
             if line == ['']:
@@ -35,16 +81,13 @@ def main():
                     continue
             
             elif 'Мастер' in line:
-                if groomer:
-                    groomers.append(groomer)
-                groomer = {'name': ,
-                           'salary': 0}
-                      
+                groomer_name = line[1].strip()
+                groomers[groomer_name] = 0
+                    
+                          
             elif 'Способ оплаты' in line:
                 payment_method = line[1].strip().lower()
-            
-            elif 'Стоимость' in line:
-                case_income = 0
+                
                 if payment_method == 'наличные':
                     case_income += int(line[1].strip())
                     cash += case_income
@@ -61,13 +104,18 @@ def main():
                             cash += case_income   
                         elif 'перевод' in mney:
                             transaction += case_income
-            
+                            
+            elif 'Стоимость' in line:
+                case_income = 0
+                
             elif 'Доп. услуги' in line:
                 if line[1] == '':
                     pass
                 else:
                     line = line[1].strip().split(' ')
                     case_income += int(line[0])
+                    
+            elif
     print(groomers)
             
             
