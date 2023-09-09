@@ -5,11 +5,20 @@ class Pet:
         self.name = name
         self.breed = breed
 
+ 
+class Groomer:
+    def __init__(self, name, percent):
+        self.name = name
+        self.percent = percent
+        self.income = 0
+        
+    def calculate_groomer_income(self, case):
+        self.income += case.total_income * (self.percent * 0.01)
+ 
         
 class Case:
     def __init__(self, date, time, pet, payment_method, price,
-                 extra, total_income, groomer_name,
-                 groomer_percent, trans, cash):
+                 extra, total_income, trans, cash):
         
         self.day, self.month, self.year = date
         self.time = time
@@ -23,13 +32,6 @@ class Case:
         self.transaction = trans
         self.cash = cash
         
-        self.groomer_name = groomer_name
-        self.groomer_percent = groomer_percent
-        self.groomer_income = self.calculate_groomer_income()
-               
-    def calculate_groomer_income(self):
-        return self.case_income * (self.groomer_percent * 0.01)
-
                 
 class DailyReport:
     def __init__(self, date, admin):
@@ -53,77 +55,52 @@ def main():
     with open('input.txt', encoding='utf8') as raw_input:
         text = raw_input.readlines()
         
-        total_income = 0
-        cash = 0
-        transaction = 0
-
-        groomers = {}
+    for line in text:
+        if line == ['']:
+            continue
         
-        date_current = None
-        for line in text:
-            line = line.strip()
-            line = line.split(':')
+        line = line.strip()
+        line = line.split(':')
+        line[0] = line[0].strip()
+        if len(line) > 1:
+            line[1] = line[1].strip()
             
-            
-            if line == ['']:
-                continue
-            
-            match = re.search('\d{2}[.,]\d{2}[.,]\d{4}', str(line))
-            if match:
-                date_new = match.string[2:len(match.string)-2]
+        info = line.pop(0)
+        
+        
+        # date match
+        match = re.search('\d{2}[.,]\d{2}[.,]\d{4}', str(line))
+        
+        match info:
+            case 'Имя':
+                pet_name = line
+            case 'Порода':
+                pet_breed = line
+            case 'Время':
+                if len(line) > 1:
+                    line = ':'.join(line)
+                    time = line
+            case 'Способ оплаты':
+                if line == 'наличные':    
+                    payment_method = 'cash'
                 
-                if not date_current:
-                    date_current = date_new  
-                    continue
-                elif not date_current == date_new:
-                    date_current = date_new
+                elif line == 'перевод':
+                    payment_method = 'transaction'
                     
-                    continue
-            
-            elif 'Мастер' in line:
-                groomer_name = line[1].strip()
-                groomers[groomer_name] = 0
-                    
-                          
-            elif 'Способ оплаты' in line:
-                payment_method = line[1].strip().lower()
-                
-                if payment_method == 'наличные':
-                    case_income += int(line[1].strip())
-                    cash += case_income
-                    
-                elif payment_method == 'перевод':
-                    case_income += int(line[1].strip())
-                    transaction += case_income
-                       
-                elif payment_method == 'наличные + перевод' or 'перевод + наличные':
-                    tmp_money = line[1].strip().split('+')
-                    for mney in tmp_money:
-                        case_income += int(mney.strip().split(' ')[0].strip())
-                        if 'наличные' in mney:
-                            cash += case_income   
-                        elif 'перевод' in mney:
-                            transaction += case_income
-                            
-            elif 'Стоимость' in line:
-                case_income = 0
-                
-            elif 'Доп. услуги' in line:
-                if line[1] == '':
-                    pass
-                else:
-                    line = line[1].strip().split(' ')
-                    case_income += int(line[0])
-                    
-            elif
-    print(groomers)
-            
-            
-def calculate_groomer_income(percent, case_income):
-    percent = percent * 0.01
-    groomer_income = case_income * percent
-    return groomer_income
+                elif 'наличные' in line and 'перевод' in line:
+                    payment_method = 'both'
+            case 'Стоимость':
+                price = line
+        
+            case 'Доп. Услуги':
+                extra = line
     
+    
+    
+    
+                
+        
               
 if __name__ == "__main__":
     main()
+    
