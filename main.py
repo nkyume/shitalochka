@@ -17,44 +17,43 @@ class Groomer:
  
         
 class Case:
-    def __init__(self, date, time, pet, payment_method, price,
-                 extra, total_income, trans, cash):
+    def __init__(self, date):
         
         self.day, self.month, self.year = date
-        self.time = time
+        self.time = None
         
-        self.pet = pet
+        self.pet = None
         
-        self.payment_method = payment_method
-        self.price = price
-        self.extra = extra 
-        self.total_income = total_income
-        self.transaction = trans
-        self.cash = cash
+        self.payment_method = None
+        self.price = None
+        self.extra = None
+        self.total_income = None
+        self.transaction = None
+        self.cash = None
         
                 
 class DailyReport:
-    def __init__(self, date, admin):
+    def __init__(self, date):
         self.day, self.month, self.year = date
         self.cases = []
         
-        self.admin = admin
+        self.admin = None
         
     def add_case(self, case):
         self.cases.append[case]
         
         
-
 class WeeklyReport:
     def __init__(self):
         pass
         
-
-
+        
 def main():
     with open('input.txt', encoding='utf8') as raw_input:
         text = raw_input.readlines()
         
+    current_date = None 
+    
     for line in text:
         if line == ['']:
             continue
@@ -69,31 +68,48 @@ def main():
         
         
         # date match
-        match = re.search('\d{2}[.,]\d{2}[.,]\d{4}', str(line))
+        date = re.search('\d{2}\.\d{2}\.\d{4}', str(line))
+        case_number = re.search('^\d+\.?$', str(line))
+        
+        # if date True and not == to current_date: start new day
+        if date == True:
+            date = date.string
+            if not current_date:
+                current_date = date
+                day = DailyReport(date.split('.'))
+            elif not current_date == date:
+                current_date = date
+                day = DailyReport(date.split('.'))
+              
+                
+        # if case_number == True: start new case
+        if case_number == True:
+            case = Case(date.split('.'))
+            DailyReport.add_case(case)
         
         match info:
             case 'Имя':
                 pet_name = line
             case 'Порода':
                 pet_breed = line
+                pet = Pet(pet_name, pet_breed)
+                case.pet = pet
             case 'Время':
                 if len(line) > 1:
                     line = ':'.join(line)
-                    time = line
+                    case.time = line
             case 'Способ оплаты':
-                if line == 'наличные':    
-                    payment_method = 'cash'
-                
+                if line == 'наличные', 'наличка':    
+                    case.payment_method = 'cash'
                 elif line == 'перевод':
-                    payment_method = 'transaction'
-                    
+                    case.payment_method = 'transaction'
                 elif 'наличные' in line and 'перевод' in line:
-                    payment_method = 'both'
+                    case.payment_method = 'both'
             case 'Стоимость':
-                price = line
-        
+                pass   
             case 'Доп. Услуги':
                 extra = line
+        
     
     
     
