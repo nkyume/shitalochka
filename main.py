@@ -1,8 +1,9 @@
-import sqlite3
+import re
+
 
 def main():
     with open('input.txt', encoding='utf8') as raw_input:
-        lines = raw_input.readlines()
+        text = raw_input.readlines()
         
         total_income = 0
         cash = 0
@@ -11,98 +12,70 @@ def main():
         groomers = []
         groomer = None
         
-        for line in lines:
-            #print(line, end="")
+        date_current = None
+        for line in text:
             line = line.strip()
+            line = line.split(':')
             
             
-            if 'Мастер:' in line:
+            
+            if line == ['']:
+                continue
+            
+            match = re.search('\d{2}[.,]\d{2}[.,]\d{4}', str(line))
+            if match:
+                date_new = match.string[2:len(match.string)-2]
+                
+                if not date_current:
+                    date_current = date_new  
+                    continue
+                elif not date_current == date_new:
+                    date_current = date_new
+                    
+                    continue
+            
+            elif 'Мастер' in line:
                 if groomer:
                     groomers.append(groomer)
-    
-                groomer = {'name': line.split(':')[1].strip(),
+                groomer = {'name': ,
                            'salary': 0}
-                
-            # Money amount
-            elif 'Стоимость:' in line:
-                case_total = 0
-                line = line.split(':')
-                try:
-                    money = int(line[1].strip())   
-                    case_total += money
-                except ValueError:
-                    cost = line[1].strip().split('+')
-                    
-                    for info in cost:
-                        info = info.strip()
-                        if 'наличные' in info:
-                            cash += int(info.split(' ')[0])
-                            case_total += cash        
-                        elif 'перевод' in info:
-                            transaction += int(info.split(' ')[0])
-                            case_total += transaction
+                      
+            elif 'Способ оплаты' in line:
+                payment_method = line[1].strip().lower()
             
-            # Payment method           
-            elif 'Способ оплаты:' in line:
-                if line == 'Способ оплаты: перевод':
-                    transaction += money
+            elif 'Стоимость' in line:
+                case_income = 0
+                if payment_method == 'наличные':
+                    case_income += int(line[1].strip())
+                    cash += case_income
                     
-                elif line == 'Способ оплаты: наличные':
-                    cash += money
-                total_income += case_total
-                
-            # Groomer percent
-            elif 'Процент мастеру:' in line:
-                line = line.split(':')
-                percent = int(line[1]) / 100
-                
-                groomer['salary'] += case_total * percent
-                
-            # Administrator    
-            elif 'Администратор:' in line:
-                groomers.append(groomer)
-                line = line.split(':')
-                admin_name = line[1].strip()
-            elif 'Администратор ЗП:' in line:
-                line = line.split(':')
-                admin_salary = int(line[1].strip())
-                
-            elif 'Администратор %:' in line:
-                line = line.split(':')
-                admin_percent = int(line[1].strip())
-                admin_percent = admin_percent / 100
-                
-    saloon_income = total_income   
-        
-    for groomer in groomers:
-        saloon_income -= groomer['salary'] 
-                 
-    saloon_income -= admin_salary
-    if saloon_income < 0:
-        admin_salary = admin_salary + (admin_salary * admin_percent)
-    else:
-        admin_salary = admin_salary + (saloon_income * admin_percent)   
-    
-    saloon_income -= saloon_income * admin_percent
+                elif payment_method == 'перевод':
+                    case_income += int(line[1].strip())
+                    transaction += case_income
+                       
+                elif payment_method == 'наличные + перевод' or 'перевод + наличные':
+                    tmp_money = line[1].strip().split('+')
+                    for mney in tmp_money:
+                        case_income += int(mney.strip().split(' ')[0].strip())
+                        if 'наличные' in mney:
+                            cash += case_income   
+                        elif 'перевод' in mney:
+                            transaction += case_income
             
-                                              
-    print()                
-    print(f"Всего {total_income} рублей")
-    print(f"Наличные: {cash} рублей")
-    print(f"Перевод: {transaction} рублей")
+            elif 'Доп. услуги' in line:
+                if line[1] == '':
+                    pass
+                else:
+                    line = line[1].strip().split(' ')
+                    case_income += int(line[0])
+    print(groomers)
+            
+            
+def calculate_groomer_income(percent, case_income):
+    percent = percent * 0.01
+    groomer_income = case_income * percent
+    return groomer_income
     
-    for groomer in groomers:
-        print()
-        print(f'Имя мастера: {groomer["name"]}')
-        print(f'Зарплата мастера: {groomer["salary"]}')
-        
-    print()
-    print(f'ЗП администратора: {admin_salary}')
-    
-    print(f'Доход салона: {saloon_income}')
-    
-         
-    
-             
+              
 if __name__ == "__main__":
     main()
