@@ -40,11 +40,15 @@ class Case:
         transaction = cash = 0
         raw_price = raw_price.split('+')
         for payment in raw_price:
-            payment = payment.strip().split(' ')
+            payment = payment.strip().replace('\n', '').split(' ')
             if 'наличные' in payment or 'наличка' in payment:
                 cash += int(payment[0].strip())
             elif 'перевод' in payment or 'по карте' in payment:
                 transaction += int(payment[0].strip())
+            elif payment == ['']:
+                pass
+            else:
+                raise ValueError(f'Error, payment method should be "перевод" or "наличные". {payment}')
         self.cash += cash
         self.transaction += transaction 
                 
