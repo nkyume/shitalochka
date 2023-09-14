@@ -11,16 +11,16 @@ class Case:
                 pet, price, extra, notes):
         self.date = date
         self.time = time
-
+        self.pet = pet
+        
+        self.groomer_name = groomer_name
+        self.groomer_percent = groomer_percent * 0.01
         self.transaction = 0
+        
         self.cash = 0
         self.__add_money(price)
         self.__add_money(extra)
-        
-        self.pet = pet
-        self.groomer_name = groomer_name
-        self.groomer_percent = groomer_percent * 0.01
-        
+    
         self.notes = notes
     
     
@@ -39,16 +39,22 @@ class Case:
     def __add_money(self, raw_price):
         transaction = cash = 0
         raw_price = raw_price.split('+')
-        for payment in raw_price:
-            payment = payment.strip().replace('\n', '').split(' ')
-            if 'наличные' in payment or 'наличка' in payment:
-                cash += int(payment[0].strip())
-            elif 'перевод' in payment or 'по карте' in payment:
-                transaction += int(payment[0].strip())
-            elif payment == ['']:
-                pass
-            else:
-                raise ValueError(f'Error, payment method should be "перевод" or "наличные". {payment}')
+        try:
+            for payment in raw_price:
+                payment = payment.strip().replace('\n', '').split(' ')
+                if 'наличные' in payment or 'наличка' in payment:
+                    cash += int(payment[0].strip())
+                elif 'перевод' in payment or 'по карте' in payment:
+                    transaction += int(payment[0].strip())
+                elif payment == ['']:
+                    pass
+                else:
+                    raise ValueError(f'Ошибка, способ оплаты должен быть "перевод" или "наличные". {payment}')
+        except ValueError as e:
+            print(f'{e} \n Ориентир: {self.pet.name}')
+            input('Нажмите ентер чтоб продолжить')
+            quit()
+            
         self.cash += cash
         self.transaction += transaction 
                 
@@ -80,12 +86,15 @@ class DailyReport:
                 }
         
     @property   
-    def saloon_income(self):
+    def saloon_income_raw(self):
         total = 0
         for case in self._cases:
             total += case.saloon_income
         return total
-        
+    @property
+    def saloon_income(self):
+        return self.saloon_income_raw - self.admin_income
+           
     @property
     def groomers_income(self):
         groomers = {}
@@ -99,7 +108,7 @@ class DailyReport:
     def admin_income(self):
         if self.admin_percent == 0:
             return self.admin_salary
-        return self.admin_salary + self.saloon_income * self.admin_percent
+        return self.admin_salary + self.saloon_income_raw * self.admin_percent
                 
     def set_admin(self, admin_name, admin_salary, admin_percent):
         self.admin_name = admin_name
@@ -229,7 +238,8 @@ def main():
                             )
                 day.add_case(case)  
                 
-    with open('output.txt', encoding='utf8', mode='w') as file:
+    with open(f'{datetime.date.today()}.txt', encoding='utf8', mode='w') as file:
+        file.write(f'{datetime.date.today()}\n\n')
         for key in week.report:
             if key == 'Мастер':
                 file.write(f'\n{key}: \n')
@@ -245,11 +255,7 @@ def main():
                 
             file.write(f'{key}: {week.report[key]} рублей\n')
 
-        
-    
-    
-    
-    
+  
 def create_date(date):
     day, month, year = date.split('.')
     day = remove_first_zero_from_number(day)
