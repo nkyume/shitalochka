@@ -23,10 +23,9 @@ class Case:
     
         self.notes = notes
     
-    
     @property    
     def groomer_income(self):
-        return self.raw_income - self.raw_income * self.groomer_percent
+        return self.raw_income * self.groomer_percent
     
     @property
     def saloon_income(self):
@@ -91,6 +90,7 @@ class DailyReport:
         for case in self._cases:
             total += case.saloon_income
         return total
+    
     @property
     def saloon_income(self):
         return self.saloon_income_raw - self.admin_income
@@ -108,7 +108,7 @@ class DailyReport:
     def admin_income(self):
         if self.admin_percent == 0:
             return self.admin_salary
-        return self.admin_salary + self.saloon_income_raw * self.admin_percent
+        return self.admin_salary + self.admin_percent * (self.saloon_income_raw - self.admin_salary)
                 
     def set_admin(self, admin_name, admin_salary, admin_percent):
         self.admin_name = admin_name
